@@ -1,0 +1,3 @@
+set +m
+export PS1='demo ❯ '
+source "__HERDR_PLUGIN_ROOT__/hooks/bash.bash"

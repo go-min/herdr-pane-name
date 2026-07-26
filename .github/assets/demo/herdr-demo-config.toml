@@ -1,0 +1,15 @@
+onboarding = false
+[theme]
+name = "__HERDR_THEME__"
+
+[terminal]
+default_shell = "/bin/bash"
+shell_mode = "non_login"
+new_cwd = "current"
+
+[experimental]
+allow_nested = true
+
+[ui]
+prompt_new_tab_name = false
+hide_tab_bar_when_single_tab = false

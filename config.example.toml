@@ -1,0 +1,5 @@
+max_length = 32
+show_args = false
+icons = true
+prefixes = true
+ignored_programs = ["ssh", "top", "htop", "vimdiff"]

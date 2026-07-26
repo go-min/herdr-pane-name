@@ -1,0 +1,79 @@
+id = "herdr.pane-name"
+name = "Pane Name"
+version = "0.1.0"
+min_herdr_version = "0.7.5"
+description = "Automatically name Herdr workspaces, tabs, and panes"
+platforms = ["linux", "macos", "windows"]
+
+[[build]]
+command = ["cargo", "build", "--release"]
+
+[[startup]]
+command = ["./target/release/herdr-pane-name", "event"]
+
+[[actions]]
+id = "reset"
+title = "Reset automatic names"
+contexts = ["global"]
+command = ["./target/release/herdr-pane-name", "reset"]
+
+[[actions]]
+id = "clear"
+title = "Clear automatic names"
+contexts = ["global"]
+command = ["./target/release/herdr-pane-name", "clear"]
+
+[[actions]]
+id = "sync"
+title = "Synchronize names"
+contexts = ["global"]
+command = ["./target/release/herdr-pane-name", "sync"]
+
+[[events]]
+on = "workspace.created"
+command = ["./target/release/herdr-pane-name", "event"]
+[[events]]
+on = "workspace.updated"
+command = ["./target/release/herdr-pane-name", "event"]
+[[events]]
+on = "workspace.focused"
+command = ["./target/release/herdr-pane-name", "event"]
+[[events]]
+on = "workspace.closed"
+command = ["./target/release/herdr-pane-name", "event"]
+[[events]]
+on = "tab.created"
+command = ["./target/release/herdr-pane-name", "event"]
+[[events]]
+on = "tab.renamed"
+command = ["./target/release/herdr-pane-name", "event"]
+[[events]]
+on = "tab.focused"
+command = ["./target/release/herdr-pane-name", "event"]
+[[events]]
+on = "tab.moved"
+command = ["./target/release/herdr-pane-name", "event"]
+[[events]]
+on = "tab.closed"
+command = ["./target/release/herdr-pane-name", "event"]
+[[events]]
+on = "pane.created"
+command = ["./target/release/herdr-pane-name", "event"]
+[[events]]
+on = "pane.closed"
+command = ["./target/release/herdr-pane-name", "event"]
+[[events]]
+on = "pane.moved"
+command = ["./target/release/herdr-pane-name", "event"]
+[[events]]
+on = "pane.focused"
+command = ["./target/release/herdr-pane-name", "event"]
+[[events]]
+on = "pane.exited"
+command = ["./target/release/herdr-pane-name", "event"]
+[[events]]
+on = "pane.agent_detected"
+command = ["./target/release/herdr-pane-name", "event"]
+[[events]]
+on = "pane.agent_status_changed"
+command = ["./target/release/herdr-pane-name", "event"]
