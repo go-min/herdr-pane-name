@@ -12,7 +12,7 @@ pub fn for_program(program: &str) -> Option<&'static str> {
         "vim" => "",
         "emacs" => "",
         "helix" => "",
-        "code" | "code-insiders" | "cursor" => "",
+        "code" | "code-insiders" => "",
         "git" | "lazygit" | "hunk" => "",
         "gh" => "",
         "docker" | "podman" => "",
@@ -50,7 +50,8 @@ pub fn for_program(program: &str) -> Option<&'static str> {
         "doggo" | "gping" | "trippy" => "󰖟",
         "dust" => "󰋊",
         "eza" | "tree" | "zoxide" => "󰉋",
-        "fd" | "procs" => "󰍛",
+        "fd" => "",
+        "procs" => "󰍛",
         "ffmpeg" => "",
         "hyperfine" => "󰔚",
         "llvm" => "",
@@ -85,6 +86,7 @@ mod tests {
         assert_eq!(for_program("zsh"), Some(""));
         assert_eq!(for_program("kubectl"), Some("󱃾"));
         assert_eq!(for_program("eza"), Some("󰉋"));
+        assert_eq!(for_program("fd"), Some(""));
         assert_eq!(for_program("spf"), Some("󰉋"));
         assert_eq!(for_program("nginx"), Some(""));
         assert_eq!(for_program("hunk"), Some(""));
