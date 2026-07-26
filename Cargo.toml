@@ -2,8 +2,15 @@
 name = "herdr-pane-name"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.80"
 license = "MIT"
-description = "Automatic Herdr workspace, tab, pane, and agent names"
+authors = ["ter.sh"]
+description = "Automatic Herdr workspace, tab, and pane names"
+repository = "https://github.com/ter-sh/herdr-pane-name"
+homepage = "https://github.com/ter-sh/herdr-pane-name"
+readme = "README.md"
+keywords = ["herdr", "terminal", "plugin", "shell"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 anyhow = "1"

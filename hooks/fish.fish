@@ -6,7 +6,13 @@ function _herdr_pane_name_fish_run
     if set -q HERDR_PANE_NAME_BIN
         set bin $HERDR_PANE_NAME_BIN
     end
-    command $bin hook >/dev/null 2>&1 &
+    if set -q HERDR_PANE_NAME_BIN
+        command $bin hook >/dev/null 2>&1 &
+    else if type -q herdr-pane-name
+        command herdr-pane-name hook >/dev/null 2>&1 &
+    else
+        command herdr plugin action invoke herdr.pane-name.sync >/dev/null 2>&1 &
+    end
 end
 function _herdr_pane_name_fish_preexec --on-event fish_preexec
     begin

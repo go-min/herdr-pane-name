@@ -5,7 +5,13 @@ if [[ -z ${HERDR_PANE_NAME_BASH_HOOK:-} ]]; then
       HERDR_PLUGIN_CONFIG_DIR="$(herdr plugin config-dir herdr.pane-name 2>/dev/null)"
       export HERDR_PLUGIN_CONFIG_DIR
     fi
-    "${HERDR_PANE_NAME_BIN:-herdr-pane-name}" hook >/dev/null 2>&1 &
+    if [[ -n ${HERDR_PANE_NAME_BIN:-} ]]; then
+      "$HERDR_PANE_NAME_BIN" hook >/dev/null 2>&1 &
+    elif command -v herdr-pane-name >/dev/null 2>&1; then
+      herdr-pane-name hook >/dev/null 2>&1 &
+    else
+      herdr plugin action invoke herdr.pane-name.sync >/dev/null 2>&1 &
+    fi
   }
   _herdr_pane_name_bash_preexec() {
     [[ $BASH_COMMAND == _herdr_pane_name_bash_* ]] && return 0
