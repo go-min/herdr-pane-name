@@ -18,7 +18,7 @@ impl Default for Config {
         Self {
             max_length: 32,
             show_args: false,
-            icons: false,
+            icons: true,
             prefixes: true,
             ignored_programs: Vec::new(),
             aliases: HashMap::new(),

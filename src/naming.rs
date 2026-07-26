@@ -1,12 +1,18 @@
-use crate::config::Config;
+use crate::{config::Config, icons};
 
 pub fn automatic(cfg: &Config, process: &str, argv: &[String], position: usize) -> String {
-    let base = cfg
-        .aliases
-        .get(process)
-        .filter(|_| cfg.icons)
-        .cloned()
-        .unwrap_or_else(|| process.to_owned());
+    let icon = if cfg.icons {
+        cfg.aliases
+            .get(process)
+            .map(String::as_str)
+            .or_else(|| icons::for_program(process))
+    } else {
+        None
+    };
+    let base = match icon {
+        Some(icon) => format!("{icon} {process}"),
+        None => process.to_owned(),
+    };
     let args = if cfg.show_args {
         argv.iter()
             .skip(1)
@@ -85,7 +91,7 @@ mod tests {
 
         assert_eq!(
             automatic(&cfg, "nvim", &["nvim".into(), "file.rs".into()], 0),
-            "1: file.rs"
+            "1: nvim file.rs"
         );
     }
 
@@ -93,10 +99,18 @@ mod tests {
     fn aliases_are_disabled_when_icons_are_disabled() {
         let cfg = Config {
             aliases: [("nvim".to_owned(), "".to_owned())].into_iter().collect(),
+            icons: false,
             ..Config::default()
         };
 
         assert_eq!(automatic(&cfg, "nvim", &[], 0), "1:nvim");
+    }
+
+    #[test]
+    fn built_in_icons_work_without_custom_aliases() {
+        let cfg = Config::default();
+
+        assert_eq!(automatic(&cfg, "docker", &[], 0), "1: docker");
     }
 
     #[test]

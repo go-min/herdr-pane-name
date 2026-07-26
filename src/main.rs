@@ -1,5 +1,6 @@
 mod config;
 mod herdr;
+mod icons;
 mod naming;
 mod state;
 mod sync;

@@ -61,8 +61,16 @@ cargo = ""
 ```
 
 `max_length` includes the numeric prefix. `show_args` appends up to three
-command arguments. `aliases` are used when `icons = true`; they are intended
-for Nerd Font glyphs, but can contain any short replacement label.
+command arguments. Icons are enabled by default. When `icons = true`, the
+plugin prepends a built-in Nerd Font glyph to the process name, for example
+`1: nvim`; it never replaces the process name. The catalog covers common
+shells, editors, languages, package managers, containers,
+cloud tools, databases, and terminal utilities. Custom `aliases` override the
+glyph and can contain any short replacement label. Unknown programs keep their
+normal process name.
+
+Examples from the built-in catalog include `hunk` (` hunk`), Antigravity's
+`agy` (`󰚩 agy`), and Herdr itself (` herdr`).
 
 Tab positions are counted independently inside each workspace, and pane
 positions independently inside each tab. Only positions 1–9 receive a
