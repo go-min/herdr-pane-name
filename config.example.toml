@@ -1,0 +1,12 @@
+max_length = 32
+show_args = false
+icons = false
+prefixes = true
+ignored_programs = ["ssh", "top", "htop", "vimdiff"]
+
+[aliases]
+nvim = ""
+cargo = ""
+node = ""
+python = ""
+
