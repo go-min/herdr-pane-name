@@ -1,6 +1,6 @@
 use anyhow::Result;
 use serde::Deserialize;
-use std::{collections::HashMap, env, fs, path::PathBuf};
+use std::{env, fs, path::PathBuf};
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(default)]
@@ -10,7 +10,6 @@ pub struct Config {
     pub icons: bool,
     pub prefixes: bool,
     pub ignored_programs: Vec<String>,
-    pub aliases: HashMap<String, String>,
 }
 
 impl Default for Config {
@@ -21,7 +20,6 @@ impl Default for Config {
             icons: true,
             prefixes: true,
             ignored_programs: Vec::new(),
-            aliases: HashMap::new(),
         }
     }
 }

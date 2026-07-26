@@ -1,5 +1,4 @@
 /// Nerd Font glyphs for common shells, editors, runtimes, CLIs, and tools.
-/// Users can override any entry through `[aliases]`.
 pub fn for_program(program: &str) -> Option<&'static str> {
     Some(match program {
         "bash" => "",

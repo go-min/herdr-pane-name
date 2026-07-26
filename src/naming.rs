@@ -2,10 +2,7 @@ use crate::{config::Config, icons};
 
 pub fn automatic(cfg: &Config, process: &str, argv: &[String], position: usize) -> String {
     let icon = if cfg.icons {
-        cfg.aliases
-            .get(process)
-            .map(String::as_str)
-            .or_else(|| icons::for_program(process))
+        icons::for_program(process)
     } else {
         None
     };
@@ -81,9 +78,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn aliases_and_arguments_are_applied_before_prefixing() {
+    fn built_in_icons_and_arguments_are_applied_before_prefixing() {
         let cfg = Config {
-            aliases: [("nvim".to_owned(), "".to_owned())].into_iter().collect(),
             show_args: true,
             icons: true,
             ..Config::default()
@@ -96,9 +92,8 @@ mod tests {
     }
 
     #[test]
-    fn aliases_are_disabled_when_icons_are_disabled() {
+    fn icons_are_disabled_when_icons_are_disabled() {
         let cfg = Config {
-            aliases: [("nvim".to_owned(), "".to_owned())].into_iter().collect(),
             icons: false,
             ..Config::default()
         };
@@ -107,7 +102,7 @@ mod tests {
     }
 
     #[test]
-    fn built_in_icons_work_without_custom_aliases() {
+    fn built_in_icons_work_without_configuration_overrides() {
         let cfg = Config::default();
 
         assert_eq!(automatic(&cfg, "docker", &[], 0), "1: docker");
