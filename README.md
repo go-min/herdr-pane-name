@@ -18,7 +18,8 @@ After installing the plugin, Herdr will provide:
 
 - automatic tab names based on the foreground process in the focused pane;
 - automatic pane names based on each pane's own foreground process;
-- automatic updates on Herdr startup, lifecycle events, and focus changes;
+- automatic updates on Herdr startup, lifecycle events, focus changes, and
+  workspace reordering;
 - optional zsh, Bash, and fish hooks for updates immediately after commands
   start or finish;
 - dynamic `1:`–`9:` jump-key prefixes for workspaces, tabs, and panes;
@@ -45,7 +46,7 @@ the display-label API needed to prefix them.
 
 ## Requirements
 
-- [Herdr](https://github.com/go-min/herdr) 0.7.5 or newer
+- [Herdr](https://github.com/herdrdev/herdr) 0.8.0 or newer
 - Rust 1.80+ to build from source
 
 The plugin itself uses only the Herdr CLI exposed through `HERDR_BIN_PATH`; it
@@ -186,8 +187,9 @@ herdr plugin link .
 ```
 
 The manifest contains event hooks for workspace, tab, pane, and agent lifecycle
-changes plus a startup sync. Herdr's event hook is a short-lived process, so
-the plugin does not hold a raw socket open or require a daemon.
+changes, including workspace reordering, plus a startup sync. Herdr's event
+hook is a short-lived process, so the plugin does not hold a raw socket open or
+require a daemon.
 
 ## License
 

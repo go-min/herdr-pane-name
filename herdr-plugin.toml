@@ -1,7 +1,7 @@
 id = "herdr.pane-name"
 name = "Pane Name"
-version = "0.1.0"
-min_herdr_version = "0.7.5"
+version = "0.1.1"
+min_herdr_version = "0.8.0"
 description = "Automatically name Herdr workspaces, tabs, and panes"
 platforms = ["linux", "macos", "windows"]
 
@@ -34,6 +34,9 @@ on = "workspace.created"
 command = ["./target/release/herdr-pane-name", "event"]
 [[events]]
 on = "workspace.updated"
+command = ["./target/release/herdr-pane-name", "event"]
+[[events]]
+on = "workspace.reordered"
 command = ["./target/release/herdr-pane-name", "event"]
 [[events]]
 on = "workspace.focused"
