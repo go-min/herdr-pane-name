@@ -12,7 +12,7 @@
 Requirements:
 
 - Rust 1.80 or newer;
-- Herdr 0.8.0 or newer for live integration checks.
+- Herdr 0.9.3 or newer (including the running server) for live integration checks.
 
 Run the same checks used by CI before opening a pull request:
 

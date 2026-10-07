@@ -33,8 +33,8 @@ After installing the plugin, Herdr will provide:
 - cross-platform operation without Bash, `jq`, or a platform-specific socket
   dependency.
 
-Agent semantic names remain unchanged because Herdr does not currently expose
-the display-label API needed to prefix them.
+Agent display names receive numeric prefixes through Herdr metadata. Semantic
+agent names, lifecycle state, and session restore identity remain unchanged.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset=".github/assets/demo/demo-dark.gif">
@@ -46,7 +46,7 @@ the display-label API needed to prefix them.
 
 ## Requirements
 
-- [Herdr](https://github.com/herdrdev/herdr) 0.8.0 or newer
+- [Herdr](https://github.com/herdrdev/herdr) 0.9.3 or newer (including the running server)
 - Rust 1.80+ to build from source
 
 The plugin itself uses only the Herdr CLI exposed through `HERDR_BIN_PATH`; it
@@ -111,6 +111,7 @@ max_length = 32
 show_args = true
 icons = true
 prefixes = true
+terminal_titles = false
 ignored_programs = ["ssh", "top"]
 ```
 
@@ -126,10 +127,22 @@ Correct icon rendering requires a
 [Nerd Font-compatible font](https://www.nerdfonts.com/). Unknown programs
 keep their normal process name.
 
+Set `terminal_titles = true` to prefer each pane's nonempty
+`terminal_title_stripped` (its OSC title with a leading activity glyph removed)
+for automatic pane and tab names. Empty titles fall back to foreground process
+names. Process ignore rules still apply; title names use the same length limit
+and numeric prefixes, without process icons or arguments. This is disabled by
+default because applications control their own OSC titles.
+
 Tab positions are counted independently inside each workspace, and pane
 positions independently inside each tab. Only positions 1–9 receive a
 numeric prefix. Workspace names keep Herdr's default base name and receive
-only their workspace prefix.
+only their workspace prefix. Agent positions are counted independently inside
+each workspace, in the order returned by Herdr's snapshot. Their display base
+is the existing display name, semantic name, or detected agent kind. Later
+manual display-name changes are preserved until the agent occupant changes.
+`clear` and `reset` restore the previous display name only while the plugin
+still owns the current value.
 
 For example, a manually renamed tab `1:review` remains `review` as its base
 name. If it becomes the second tab, the plugin changes it to `2:review`; it
@@ -156,27 +169,28 @@ Manual labels are never touched.
 The plugin stores ownership state in `labels.json` under Herdr's plugin config
 directory. It does not read or write the repository checkout after install.
 
-Agent semantic names are intentionally left unchanged. Herdr currently
-rejects the requested `1:agent` form in `agent rename`; agent prefixes need a
-separate display-label API in Herdr. Agent lifecycle events are still useful
-because they trigger a tab/pane resynchronization.
-
 ## API boundary
 
-Herdr currently exposes everything needed to read a foreground process and
-rename an individual pane/tab. It does not expose a first-class “automatic
-label” or “manual label” bit, nor a plugin-owned long-lived event subscription.
-This plugin compensates with a small `labels.json` ownership state file in the
-plugin config directory and manifest event hooks. A future minimal Herdr API
-addition would be `label_source` on pane/tab records plus a plugin-owned rename
-operation; that would remove the state-file heuristic. A native subscription
-hook would also reduce process spawning, but is not required for correctness.
+The plugin reads workspace, tab, pane, and agent records with a single
+`herdr api snapshot` call per synchronization. Foreground process argv still
+comes from `pane process-info`. Agent prefixes use `pane report-metadata`
+with `--display-agent` and an agent guard, never `agent rename` or lifecycle
+reports.
 
-Herdr's current plugin event surface does not provide a dedicated
-`pane.foreground_process_changed` event with process/argv payload. The plugin
-therefore reads `pane process-info` during lifecycle events and uses the
-optional shell hooks for command-level updates. This is the only known reason
-the install cannot yet be completely shell-integration-free.
+Herdr does not expose a first-class automatic/manual label ownership field.
+The plugin keeps its `labels.json` ownership state, including previous agent
+display names and the mapping from stable `terminal_id` to current `pane_id`.
+Synchronization holds an OS file lock across reads, mutations, and state writes,
+so concurrent event and shell hooks cannot adopt each other's labels.
+This preserves pane ownership and manual prefix bases when a live terminal
+moves between workspaces. Existing state files migrate on the first sync;
+move tracking starts once that initial terminal mapping has been recorded.
+
+There is no dedicated `pane.foreground_process_changed` event with argv.
+`pane.updated` can signal OSC title changes, but does not replace command-level
+updates. Optional shell hooks remain useful, including for title updates.
+The plugin keeps short-lived manifest hooks rather than a socket subscriber
+requiring reconnect and `events_lost` recovery.
 
 ## Development build and link
 

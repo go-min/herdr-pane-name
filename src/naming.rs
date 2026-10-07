@@ -1,5 +1,25 @@
 use crate::{config::Config, icons};
 
+pub fn for_pane(
+    cfg: &Config,
+    pane: &serde_json::Value,
+    process: &str,
+    argv: &[String],
+    position: usize,
+) -> String {
+    if cfg.terminal_titles {
+        if let Some(title) = pane
+            .get("terminal_title_stripped")
+            .and_then(serde_json::Value::as_str)
+            .map(str::trim)
+            .filter(|title| !title.is_empty())
+        {
+            return prefixed(cfg, title, position);
+        }
+    }
+    automatic(cfg, process, argv, position)
+}
+
 pub fn automatic(cfg: &Config, process: &str, argv: &[String], position: usize) -> String {
     let icon = if cfg.icons {
         icons::for_program(process)
@@ -119,5 +139,35 @@ mod tests {
     fn truncation_is_unicode_safe_and_has_a_minimum_length() {
         assert_eq!(truncate(" review", 3), " r");
         assert_eq!(truncate("", 0), "");
+    }
+}
+
+#[cfg(test)]
+mod title_tests {
+    use super::*;
+    use serde_json::json;
+    #[test]
+    fn titles_are_opt_in_and_empty_titles_fall_back_to_process() {
+        let pane = json!({"terminal_title_stripped":"  auth 🔧  "});
+        let cfg = Config {
+            icons: false,
+            ..Config::default()
+        };
+        assert_eq!(for_pane(&cfg, &pane, "nvim", &[], 0), "1:nvim");
+        let cfg = Config {
+            terminal_titles: true,
+            ..cfg
+        };
+        assert_eq!(for_pane(&cfg, &pane, "nvim", &[], 0), "1:auth 🔧");
+        assert_eq!(
+            for_pane(
+                &cfg,
+                &json!({"terminal_title_stripped":" "}),
+                "nvim",
+                &[],
+                0
+            ),
+            "1:nvim"
+        );
     }
 }
