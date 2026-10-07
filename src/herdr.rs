@@ -26,13 +26,39 @@ impl Client {
                 String::from_utf8_lossy(&output.stderr)
             );
         }
-        serde_json::from_slice(&output.stdout)
-            .with_context(|| format!("invalid JSON from herdr {args:?}"))
+        // Mutation commands such as report-metadata succeed without JSON output.
+        if output.stdout.iter().all(u8::is_ascii_whitespace) {
+            return Ok(Value::Null);
+        }
+        let response: Value = serde_json::from_slice(&output.stdout)
+            .with_context(|| format!("invalid JSON from herdr {args:?}"))?;
+        if let Some(error) = response.get("error") {
+            anyhow::bail!("herdr {args:?} failed: {error}");
+        }
+        Ok(response)
     }
 
-    pub fn list(&self, kind: &str) -> Result<Vec<Value>> {
-        let response = self.run(&[kind, "list"])?;
-        Ok(array(&response, kind).into_iter().cloned().collect())
+    pub fn snapshot(&self) -> Result<Snapshot> {
+        snapshot_records(&self.run(&["api", "snapshot"])?)
+    }
+
+    pub fn display_agent(&self, pane: &str, agent: &str, label: Option<&str>) -> Result<()> {
+        let mut args = vec![
+            "pane",
+            "report-metadata",
+            pane,
+            "--source",
+            "plugin:herdr.pane-name",
+            "--agent",
+            agent,
+        ];
+        if let Some(label) = label {
+            args.extend(["--display-agent", label]);
+        } else {
+            args.push("--clear-display-agent");
+        }
+        self.run(&args)?;
+        Ok(())
     }
 
     pub fn process_info(&self, pane_id: &str) -> Result<Value> {
@@ -50,21 +76,31 @@ impl Client {
     }
 }
 
-pub fn array<'a>(value: &'a Value, key: &str) -> Vec<&'a Value> {
+pub struct Snapshot {
+    pub workspaces: Vec<Value>,
+    pub tabs: Vec<Value>,
+    pub panes: Vec<Value>,
+    pub agents: Vec<Value>,
+}
+
+fn snapshot_records(value: &Value) -> Result<Snapshot> {
     let result = value.get("result").unwrap_or(value);
-    if let Some(array) = result.as_array() {
-        return array.iter().collect();
-    }
-    result
-        .get(match key {
-            "workspace" => "workspaces",
-            "tab" => "tabs",
-            "pane" => "panes",
-            _ => key,
-        })
-        .and_then(Value::as_array)
-        .map(|array| array.iter().collect())
-        .unwrap_or_default()
+    let result = result.get("snapshot").unwrap_or(result);
+    let records = |key| {
+        result
+            .get(key)
+            .and_then(Value::as_array)
+            .cloned()
+            .with_context(|| {
+                format!("Herdr snapshot is missing {key}; update the running server to 0.9.3+")
+            })
+    };
+    Ok(Snapshot {
+        workspaces: records("workspaces")?,
+        tabs: records("tabs")?,
+        panes: records("panes")?,
+        agents: records("agents")?,
+    })
 }
 
 pub fn string(value: &Value, keys: &[&str]) -> Option<String> {
@@ -107,15 +143,6 @@ mod tests {
     use serde_json::json;
 
     #[test]
-    fn array_supports_wrapped_and_named_responses() {
-        let response = json!({"result": {"panes": [{"id": "p1"}]}});
-        assert_eq!(array(&response, "pane").len(), 1);
-
-        let response = json!({"result": [{"id": "p1"}]});
-        assert_eq!(array(&response, "pane").len(), 1);
-    }
-
-    #[test]
     fn foreground_program_uses_the_last_process_and_basename() {
         let response = json!({
             "result": {
@@ -135,5 +162,20 @@ mod tests {
                 vec!["nvim".to_owned(), "file.rs".to_owned()]
             ))
         );
+    }
+}
+
+#[cfg(test)]
+mod snapshot_tests {
+    use super::*;
+    use serde_json::json;
+    #[test]
+    fn snapshot_requires_all_resource_arrays() {
+        assert!(snapshot_records(
+            &json!({"result":{"type":"session_snapshot", "snapshot":{"workspaces":[], "tabs":[], "panes":[], "agents":[]}}})
+        )
+        .is_ok());
+        assert!(snapshot_records(&json!({"error":{"code":"unknown_method"}})).is_err());
+        assert!(snapshot_records(&json!({"result":{"workspaces":[]}})).is_err());
     }
 }

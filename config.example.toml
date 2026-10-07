@@ -2,4 +2,6 @@ max_length = 32
 show_args = false
 icons = true
 prefixes = true
+# Prefer nonempty OSC titles over process names; manual names remain preserved.
+terminal_titles = false
 ignored_programs = ["ssh", "top", "htop", "vimdiff"]

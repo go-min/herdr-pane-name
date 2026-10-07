@@ -9,6 +9,7 @@ pub struct Config {
     pub show_args: bool,
     pub icons: bool,
     pub prefixes: bool,
+    pub terminal_titles: bool,
     pub ignored_programs: Vec<String>,
 }
 
@@ -19,6 +20,7 @@ impl Default for Config {
             show_args: false,
             icons: true,
             prefixes: true,
+            terminal_titles: false,
             ignored_programs: Vec::new(),
         }
     }
